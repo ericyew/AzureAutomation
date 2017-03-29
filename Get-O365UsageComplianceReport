@@ -1,0 +1,65 @@
+<# 
+	.SYNOPSIS
+		Export Office 365 Licensing assignment to csv file and send an email via O365
+	
+	.DESCRIPTION
+		This runbook is designed to run against O365 to pull licensing assignment from SGG Tenant 
+        to a CSV file and email it to a group of recipients
+	
+	.PARAMETER
+        From
+            Who to send from
+        To
+            Recipient of Email
+        
+  .REQUIREMENTS
+		
+
+	.NOTES
+		Author: Eric Yew
+		Modified By: Eric Yew
+		LASTEDIT: Mar 29, 2017
+        Source: https://github.com/ericyew/AzureHybridWorkers/blob/master/Get-O365UsageComplianceReport.ps1
+
+	.CHANGE LOG
+		29/03/2017 v1.0 - Initial Release
+			- Login to O365 tenant
+            - Export license to csv
+            - Send email
+#>
+
+    param (
+        [parameter(Mandatory=$false)] 
+    	  [String] $Credential = "PSAdmin",
+        
+        [parameter(Mandatory=$false)] 
+    	  [String] $To = "name@domain.com"
+    )
+#>
+
+#Login to Office 365
+    $Cred = Get-AutomationPSCredential -Name $Credential -ErrorAction Stop
+    $null = Connect-MsolService -credential $Cred
+
+#Get licensing deployment and export to csv
+    $Path = $(get-location).Path + '\ExportLicenseUsage.csv'
+    #write-output $Path
+    Get-MsolUser -All |Where {$_.IsLicensed -eq $true } |Select DisplayName,UsageLocation,@{n="Licenses Type";e={$_.Licenses.AccountSKUid}} | Export-csv -Path $Path
+
+#Send email
+    $Body = "License usage in CSV file attached for Slater and Gordon. Do not reply to this email as this mailbox is not monitored. "
+    $Subject = "Office 365 License Usage" 
+    $From = $Cred.UserName
+
+    $To = "Ourania.Haviaridis@slatergordon.com.au"
+    $To1 = "C.Roodenburgh@softwareone.com"
+    $To2 = "Prateek.Srivastava@softwareone.com"
+    $To3 = "Sandi.McDonald@softwareone.com"
+    $To4 = "eric.yew@slatergordon.com.au"
+
+    #write-output $From
+    #write-output $O365Cred
+    Send-MailMessage -To $To, $To1, $To2, $To3, $To4 -Subject $Subject -Body $Body -UseSsl -Port 587 -SmtpServer 'smtp.office365.com' -From $From -BodyAsHtml -Credential $O365Cred -Attachments $Path
+   
+    Write-Output "Mail should be sent now `n"
+ 
