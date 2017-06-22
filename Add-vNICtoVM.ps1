@@ -70,7 +70,7 @@
         [String] $IPAddress,
 
         [parameter(Mandatory=$false)] 
-        [String] $NumOfNewNIC = "1"
+        [String] $PowerOnVm = 'yes'
     ) 
 
 #Error Checking: Trim white space in string entered.
@@ -80,6 +80,7 @@
     $vNetName = $vNetName -replace '\s',''
     $SubnetName = $SubnetName -replace '\s',''
     $IPAddress = $IPAddress -replace '\s',''
+    $PowerOnVm = $PowerOnVM.ToLower() -replace '\s',''
 
 # Getting automation assets
     $AzureCred = Get-AutomationPSCredential -Name 'PSAdmin' -ErrorAction Stop
@@ -104,12 +105,12 @@
 
     New-AzureRmNetworkInterface -Name $NICName -ResourceGroupName $NICResourceGroup -Location $Location -SubnetId $SubnetID -PrivateIpAddress $IPAddress
  
-#Add the second NIC
-#    $NewNIC = Get-AzureRmNetworkInterface -Name $NICName -ResourceGroupName $NICResourceGroup
-#    $VM = Add-AzureRmVMNetworkInterface -VM $VM -Id $NewNIC.Id
+#Add the new NIC
+    $NewNIC = Get-AzureRmNetworkInterface -Name $NICName -ResourceGroupName $NICResourceGroup
+    $VM = Add-AzureRmVMNetworkInterface -VM $VM -Id $NewNIC.Id
     
-    # Show the Network interfaces
-#    $VM.NetworkProfile.NetworkInterfaces
+# Show the Network interfaces
+    $VM.NetworkProfile.NetworkInterfaces
 
 #Shutdown VM
     "Shutting down the virtual machine ..."
@@ -125,13 +126,11 @@
         "The virtual machine has been stopped."
     }
 
-#Update the VM configuration (The VM will be restarted)
+#Update the VM configuration
     Update-AzureRmVM -VM $VM -ResourceGroupName $ResourceGroupName
 
-
-
-
-
-
-
-
+#Start VM
+    If ($StartVM -eq 'yes')
+        {
+            Start-AzureRmVM -Name $VM.Name -ResourceGroupName $VM.ResourceGroupName
+        }
