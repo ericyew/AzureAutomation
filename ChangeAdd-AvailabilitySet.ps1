@@ -44,6 +44,7 @@
 	Created By: Eric Yew
 	LAST EDIT: July 7, 2016
 	By: Eric Yew
+	SOURCE: https://github.com/ericyew/AzureAutomation/blob/master/ChangeAdd-AvailabilitySet.ps1
 #>
 
 param (
