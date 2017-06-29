@@ -38,6 +38,7 @@
  	Created By: Eric Yew
 	LAST EDIT: July 7, 2016
 	By: Eric Yew
+	SOURCE: https://github.com/ericyew/AzureAutomation/master/Rename-AzureRmVM.ps1
 #>
 
 param (
