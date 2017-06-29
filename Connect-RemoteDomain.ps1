@@ -12,7 +12,7 @@
     .NOTES
         AUTHOR: Eric Yew
         LASTEDIT: Feb 3, 2017
-        SOURCE: 
+        SOURCE: https://github.com/ericyew/AzureAutomation/blob/master/Connect-RemoteDomain.ps1
 #>
 
 param (
