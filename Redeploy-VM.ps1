@@ -32,7 +32,8 @@
 .NOTES
 	Created By: Eric Yew
 	LAST EDIT: July 19, 2016
-		By: Eric Yew
+	By: Eric Yew
+	SOURCE: https://github.com/ericyew/AzureAutomation/blob/master/Redeploy-VM.ps1
 #>
 
 param (
