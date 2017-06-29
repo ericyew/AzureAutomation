@@ -11,7 +11,7 @@
     .NOTES
         AUTHOR: Eric Yew
         LASTEDIT: Feb 3, 2017
-        SOURCE: 
+        SOURCE: https://github.com/ericyew/AzureAutomation/tree/master/AzureHybridWorker
 #>
 
 param (
@@ -42,6 +42,3 @@ param (
 		-DomainCredential $DomainCredential
 
 Remove-ADGroupMember -Identity $GroupName -Members $MemberSamID -Confirm:$false
-
-
-
