@@ -45,7 +45,7 @@
 		Author: Jean-Pierre Simonis
 		Modified By: Eric Yew
 		LASTEDIT: Feb 8, 2017
-    Source: https://github.com/ericyew/AzureAutomation/AzureHybridWorkers/blob/master/Set-O365ImmutableID.ps1
+    Source: https://github.com/ericyew/AzureAutomation/blob/master/AzureHybridWorker/Set-O365ImmutableID.ps1
 
 	.CHANGE LOG
 		16/06/2016 v1.0 - Initial Release
