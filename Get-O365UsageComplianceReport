@@ -19,13 +19,13 @@
 		Author: Eric Yew
 		Modified By: Eric Yew
 		LASTEDIT: Mar 29, 2017
-        Source: https://github.com/ericyew/AzureHybridWorkers/blob/master/Get-O365UsageComplianceReport.ps1
+        	Source: https://github.com/ericyew/AzureAutomation/blob/master/Get-O365UsageComplianceReport.ps1
 
 	.CHANGE LOG
 		29/03/2017 v1.0 - Initial Release
 			- Login to O365 tenant
-            - Export license to csv
-            - Send email
+            		- Export license to csv
+            		- Send email
 #>
 
     param (
@@ -51,11 +51,11 @@
     $Subject = "Office 365 License Usage" 
     $From = $Cred.UserName
 
-    $To = "Ourania.Haviaridis@slatergordon.com.au"
-    $To1 = "C.Roodenburgh@softwareone.com"
-    $To2 = "Prateek.Srivastava@softwareone.com"
-    $To3 = "Sandi.McDonald@softwareone.com"
-    $To4 = "eric.yew@slatergordon.com.au"
+    $To = "aaa@bbb.cc"
+    $To1 = "bbb@ccc.dd"
+    $To2 = "kkk@iii.zzz"
+    $To3 = "zbc@xyz.cc"
+    $To4 = "xxx@yyy.zz"
 
     #write-output $From
     #write-output $O365Cred
