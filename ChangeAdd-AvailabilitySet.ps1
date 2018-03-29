@@ -76,7 +76,7 @@ $AzureCred = Get-AutomationPSCredential -Name 'PSAdmin' -ErrorAction Stop
 
 # Connecting to Azure
 $Conn = Get-AutomationConnection -Name AzureRunAsConnection 
-Add-AzureRMAccount -ServicePrincipal -Tenant $Conn.TenantID -ApplicationId $Conn.ApplicationID -CertificateThumbprint
+Add-AzureRMAccount -ServicePrincipal -Tenant $Conn.TenantID -ApplicationId $Conn.ApplicationID -CertificateThumbprint $Conn.CertificateThumbprint
 
 # Getting the virtual machine
 $VM = Get-AzureRmVM -ResourceGroupName $ResourceGroupName -Name $VMName -ErrorAction Stop
