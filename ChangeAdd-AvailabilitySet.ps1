@@ -75,7 +75,8 @@ $ResourceGroupName = $ResourceGroupName -replace '\s',''
 $AzureCred = Get-AutomationPSCredential -Name 'PSAdmin' -ErrorAction Stop
 
 # Connecting to Azure
-$null = Add-AzureRmAccount -Credential $AzureCred -SubscriptionName $AzureSubscriptionName -ErrorAction Stop
+$Conn = Get-AutomationConnection -Name AzureRunAsConnection 
+Add-AzureRMAccount -ServicePrincipal -Tenant $Conn.TenantID -ApplicationId $Conn.ApplicationID -CertificateThumbprint
 
 # Getting the virtual machine
 $VM = Get-AzureRmVM -ResourceGroupName $ResourceGroupName -Name $VMName -ErrorAction Stop
