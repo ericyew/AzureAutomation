@@ -120,7 +120,6 @@ else
     $vm.AvailabilitySetReference = $asRef # To remove VM from Availability Set, set to $null
 	
 #Reconfigure and Clean-up VM config to reflect deployment from attached disks
-    $vm.StorageProfile.OSDisk.Name = $vmName
     $vm.StorageProfile.OSDisk.CreateOption = "Attach"
     $vm.StorageProfile.DataDisks | 
         ForEach-Object { $_.CreateOption = "Attach" }
