@@ -44,7 +44,7 @@
 	Created By: Eric Yew - OLIKKA
 	LAST EDIT: April 30, 2016
 	By: Eric Yew
-	SOURCE: https://github.com/ericyew/AzureAutomation/blob/master/ChangeAdd-AvailabilitySet.ps1
+	SOURCE: https://github.com/ericyew/AzureAutomation/blob/master/Set-AvailabilitySet.ps1
 #>
 
 param (
