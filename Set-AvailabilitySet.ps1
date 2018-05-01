@@ -8,16 +8,11 @@
   	- Stops the specified virtual machine
 	- Store the virtual machine configuration
 	- Remove the virtual machine from Azure
-	- Recreate the virtual machine with existing name, existing vhd, existing nic and new/existing/remove availability set.
+	- Recreate the virtual machine with existing name, existing vhd, existing nic and new/existing availability set.
 	- Starts the specified virtual machine
   
-.PARAMETER AzureCredentialAssetName
-   Optional with default of "AzureCredential".
-   The name of an Automation credential asset that contains the Azure AD user credential with authorization for this subscription. 
-   To use an asset with a different name you can pass the asset name as a runbook input parameter or change the default value for the input parameter.
-
 .PARAMETER AzureSubscriptionName  
-   Optional with default of "SGG-Infrastructure-Prod-SCE".  
+   Optional with default of "WCC Production EA".  
    The name of An Automation variable asset that contains the GUID for this Azure subscription.  
    To use an asset with a different name you can pass the asset name as a runbook input parameter or change the default value for the input parameter.  
 
@@ -42,20 +37,20 @@
    
 .NOTES
 	Created By: Eric Yew - OLIKKA
-	LAST EDIT: April 30, 2016
+	LAST EDIT: May 1, 2018
 	By: Eric Yew
 	SOURCE: https://github.com/ericyew/AzureAutomation/blob/master/Set-AvailabilitySet.ps1
 #>
 
 param (
     [Parameter(Mandatory=$false)] 
-    [String] $AzureSubscriptionName = "WCC Production EA",
+    [String] $AzureSubscriptionName = "1-Prod, 2-Dev/Test, 3-Website *Defaults to Prod*",
 
     [parameter(Mandatory=$true)] 
     [String] $VMName,
 
 	[parameter(Mandatory=$true)] 
-    [String] $CreateNewAvailabilitySet = "Yes/No/Remove. Default to No",
+    [String] $CreateNewAvailabilitySet = "Yes / No / Remove *Default to No*",
 	
 	[parameter(Mandatory=$true)] 
     [String] $AvailabilitySetName,
@@ -69,25 +64,90 @@ param (
 
 # Error Checking: Trim white space from both ends of string enter.
 $VMName = $VMName -replace '\s',''
-$AzureSubscriptionName = $AzureSubscriptionName -replace '\s',''	
+$AzureSubscriptionName = $AzureSubscriptionName.trim()	
 $AvailabilitySetName = $AvailabilitySetName -replace '\s',''
 $ResourceGroupName = $ResourceGroupName -replace '\s',''
+$CreateNewAvailabilitySet = $CreateNewAvailabilitySet.trim()
 
-# Determine Create/Remove/use existing availability set
-    if($CreateNewAvailabilitySet -eq "Yes/No/Remove. Default to No")
+# Determine to Create/Remove/Use existing availability set
+    if($CreateNewAvailabilitySet -eq "Yes / No / Remove *Default to No*")
     {
         $CreateNewAvailabilitySet = "No"
     }
+
+# Retrieve subscription name from variable asset if not specified
+    if($AzureSubscriptionName -eq "1" -Or $AzureSubscriptionName -eq "1-Prod, 2-Dev/Test, 3-Website *Defaults to Prod*")
+    {
+        $AzureSubscriptionName = Get-AutomationVariable -Name 'Prod Subscription Name'
+        if($AzureSubscriptionName.length -gt 0)
+        {
+            Write-Output "Specified subscription name/ID: [$AzureSubscriptionName]"
+        }
+        else
+        {
+            throw "No variable asset with name 'Prod Subscription Name' was found. Either specify an Azure subscription name or define the 'Prod Subscription Name' variable setting"
+        }
+    }
+    elseIf($AzureSubscriptionName -eq "2")
+    {
+        $AzureSubscriptionName = Get-AutomationVariable -Name 'DevTest Subscription Name'
+        if($AzureSubscriptionName.length -gt 0)
+        {
+            Write-Output "Specified subscription name/ID: [$AzureSubscriptionName]"
+        }
+        else
+        {
+            throw "No variable asset with name 'DevTest Subscription Name' was found. Either specify an Azure subscription name or define the 'DevTest Subscription Name' variable setting"
+        }
+    }
+    elseIf($AzureSubscriptionName -eq "3")
+    {
+        $AzureSubscriptionName = Get-AutomationVariable -Name 'Website Subscription Name'
+        if($AzureSubscriptionName.length -gt 0)
+        {
+            Write-Output "Specified subscription name/ID: [$AzureSubscriptionName]"
+        }
+        else
+        {
+            throw "No variable asset with name 'Website Subscription Name' was found. Either specify an Azure subscription name or define the 'Website Subscription Name' variable setting"
+        }
+    }
     else
     {
-        $CreateNewAvailabilitySet = $CreateNewAvailabilitySet -replace '\s',''
+        if($AzureSubscriptionName.length -gt 0)
+        {
+            Write-Output "Specified subscription name/ID: [$AzureSubscriptionName]"
+        }
+        else
+        {
+            throw "No variable asset or subscription with name $AzureSubscriptionName was found. Either specify an Azure subscription name or specify 1,2 or 3 options"
+        }
     }
 
-# Connect to Azure
-    $Conn = Get-AutomationConnection -Name AzureRunAsConnection
-    $Cert = Get-AutomationCertificate -Name 'AzureRunAsCertificate'
-    #Write-Verbose "$Conn $Cert"
-    Connect-AzureRmAccount -ServicePrincipal -Tenant $Conn.TenantID -ApplicationId $Conn.ApplicationID -CertificateThumbprint $Cert.Thumbprint
+#Connect to Azure
+    try
+    {
+        # Get the connection "AzureRunAsConnection "
+        $servicePrincipalConnection=Get-AutomationConnection -Name AzureRunAsConnection         
+
+        "Logging in to Azure..."
+        Connect-AzureRmAccount `
+            -ServicePrincipal `
+            -TenantId $servicePrincipalConnection.TenantId `
+            -ApplicationId $servicePrincipalConnection.ApplicationId `
+            -CertificateThumbprint $servicePrincipalConnection.CertificateThumbprint 
+    }
+    catch {
+        if (!$servicePrincipalConnection)
+        {
+            $ErrorMessage = "Connection AzureRunAsConnection not found."
+            throw $ErrorMessage
+        } else{
+            Write-Error -Message $_.Exception
+            throw $_.Exception
+        }
+    }
+    Select-AzureRmSubscription -SubscriptionName $AzureSubscriptionName
 
 # Getting the virtual machine
     $VM = Get-AzureRmVM -ResourceGroupName $ResourceGroupName -Name $VMName -ErrorAction Stop
@@ -168,4 +228,4 @@ else
 #Recreate the virtual machine with the new name
     New-AzureRmVM -ResourceGroupName $ResourceGroupName -Location $VM.Location -VM $VM -Verbose
 
-"The virtual machine has been added to availability group and started."
+"The virtual machine $VMName availability set has been changed and started."
